@@ -63,6 +63,8 @@ function criarANO(){
 
     d3.select("body").append("h2").text("Queimadas por ano")
                 .attr("x", porAno.length*30/2)
+                .style("color", "black")
+                .style("text-align","center");
 
     var canvas = d3.select("body").append("svg")
                 .attr("id", "grafico1")
@@ -106,7 +108,7 @@ function criarANO(){
                 .attr("x", i*35)
                 .attr("y", 165)
                 .attr("fill", "black")
-                .text("Ano")
+                .text( porAno[i].year )
     }
 }
 
