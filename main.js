@@ -1,24 +1,64 @@
-var canvas = d3.select("body").append("svg")
-                .attr("width", 50000)
-                .attr("height", 3000)
+let porMesEstado = []
+let porAnoEstado = []
+let porEstado = []
+let porAno = []
+let flag = false;
+const csv = d3.csv("amazon.csv", function (data){
+    porMesEstado.push({
+        year: data.year,
+        state: data.state,
+        month: data.month,
+        number: parseInt(data.number)
+    })
 
-var barra1 = canvas.append("rect")
-                .attr("width", 300)
-                .attr("height", 100)
-                .attr("fill", "red")
+    var inserirAnoEstado = true;
+    porAnoEstado.forEach((element, index) => {
+        if(element.state == data.state && element.year == data.year){
+            inserirAnoEstado = false;
+            element.number += parseInt(data.number, 10);
+        } 
+    });
 
-d3.csv("amazon.csv", function (dados){
-    console.log( dados.id, dados.year, dados.state, dados.month);
-    canvas.append("rect")
-    //.data(dados)
-    //.enter()
-        .attr("y", function () {return dados.number/5;})
-        .attr("text", function() { return "quantidade " + dados.number + " " + dados.state +" "+ dados.year; })
-        .attr("width", function () {return dados.number/5;})
-        .attr("height", 12)
-        .attr("fill", "blue")
-        
-        //.attr("y", function () {return dados.id*15;})
+    var inserirEstado = true;
+    porEstado.forEach(element => {
+        if(element.state == data.state) {
+            inserirEstado = false;
+            element.number += parseInt(data.number);
+        }
+    })
+
+    var inserirAno = true;
+    porAno.forEach(element => {
+        if(element.year == data.year){
+            inserirAno = false;
+            element.number += parseInt(data.number, 10);
+        }
+    })
+
+    if(inserirAnoEstado){
+        porAnoEstado.push({
+            year: data.year,
+            state: data.state,
+            number: parseInt(data.number, 10)
+        })
+    }
+
+    if(inserirEstado){
+        porEstado.push({
+            state: data.state,
+            number: parseInt(data.number)
+        })
+    }
+
+    if(inserirAno) {
+        porAno.push({
+            year: data.year,
+            number: parseInt(data.number)
+        })
+    }
+
 })
 
-//document.getElementById("demo").innerHTML = "teste";
+csv.then(() => {
+
+});
