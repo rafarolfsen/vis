@@ -59,6 +59,98 @@ const csv = d3.csv("amazon.csv", function (data){
 
 })
 
-csv.then(() => {
+function criarANO(){
 
-});
+    d3.select("body").append("h2").text("Queimadas por ano")
+                .attr("x", porAno.length*30/2)
+
+    var canvas = d3.select("body").append("svg")
+                .attr("id", "grafico1")
+                .attr("width", porAno.length*30)
+                .attr("height", 300)
+                .attr("fill", "steelblue")
+
+    var maior = 0;
+    var menor = Number.MAX_SAFE_INTEGER;
+    porAno.forEach((element) =>  {
+        if(element.number > maior){
+            maior = element.number;
+        }
+        if(element.number < menor){
+            menor = element.number;
+        }
+    });
+    if(menor != 0){
+        menor = menor - maior/10;
+    }
+
+    for(let i = 0; i < porAno.length; i++){
+        var aux = (porAno[i].number-menor)/(maior-menor);
+        canvas.append("rect")
+            .attr("width", 25)
+            .attr("height", aux*100)
+            .attr("fill", "blue")
+            .attr("x", i*30)
+            .attr("y", 150 - aux*100)
+            .on("mouseover", function(){
+                d3.select(this)
+                .style("fill", "red");
+            })
+            .on("mouseout", function(){
+                d3.select(this)
+                .style("fill", "blue");
+            })
+    }
+}
+
+function criarEstado(){
+
+    var canvas = d3.select("body").append("svg")
+                .attr("id", "grafico2")
+                .attr("width", porEstado.length*30)
+                .attr("height", 300)
+                .attr("fill", "steelblue")
+        
+
+    var maior = 0;
+    var menor = Number.MAX_SAFE_INTEGER;
+    porEstado.forEach((element) =>  {
+        if(element.number > maior){
+            maior = element.number;
+        }
+        if(element.number < menor){
+            menor = element.number;
+        }
+    });
+    if(menor != 0){
+        menor = menor - maior/10;
+    }
+
+    for(let i = 0; i < porEstado.length; i++){
+        var aux = (porEstado[i].number-menor)/(maior-menor);
+        canvas.append("rect")
+            .attr("width", 25)
+            .attr("height", aux*100)
+            .attr("fill", "blue")
+            .attr("x", i*30)
+            .attr("y", 100 - aux*100)
+            .on("mouseover", function(){
+                d3.select(this)
+                .style("fill", "red");
+            })
+            .on("mouseout", function(){
+                d3.select(this)
+                .style("fill", "blue");
+            })
+    }
+}
+
+csv.then(function(){
+
+///////////////////////////////////////////////////////////// POR ANO
+    criarANO();
+/////////////////////////////////////////////////////   POR ESTADO
+    criarEstado();
+    
+
+})
