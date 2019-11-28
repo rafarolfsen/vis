@@ -66,7 +66,7 @@ function criarANO(){
 
     var canvas = d3.select("body").append("svg")
                 .attr("id", "grafico1")
-                .attr("width", porAno.length*30)
+                .attr("width", porAno.length*35)
                 .attr("height", 300)
                 .attr("fill", "steelblue")
 
@@ -87,10 +87,10 @@ function criarANO(){
     for(let i = 0; i < porAno.length; i++){
         var aux = (porAno[i].number-menor)/(maior-menor);
         canvas.append("rect")
-            .attr("width", 25)
+            .attr("width", 30)
             .attr("height", aux*100)
             .attr("fill", "blue")
-            .attr("x", i*30)
+            .attr("x", i*35)
             .attr("y", 150 - aux*100)
             .on("mouseover", function(){
                 d3.select(this)
@@ -100,6 +100,13 @@ function criarANO(){
                 d3.select(this)
                 .style("fill", "blue");
             })
+        canvas.append("text")
+                .attr("width", 30)
+                .attr("height", 10)
+                .attr("x", i*35)
+                .attr("y", 165)
+                .attr("fill", "black")
+                .text("Ano")
     }
 }
 
