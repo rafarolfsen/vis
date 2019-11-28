@@ -61,7 +61,7 @@ const csv = d3.csv("amazon.csv", function (data){
 
 function criarANO(){
 
-    d3.select("body").append("h2").text("Queimadas por ano")
+    d3.select("body").append("h2").text("Queimadas por ano (em milhares)")
                 .attr("x", porAno.length*30/2)
                 .style("color", "black")
                 .style("text-align","center");
@@ -69,8 +69,7 @@ function criarANO(){
     var canvas = d3.select("body").append("svg")
                 .attr("id", "grafico1")
                 .attr("width", porAno.length*35)
-                .attr("height", 300)
-                .attr("fill", "steelblue")
+                .attr("height", 200)
 
     var maior = 0;
     var menor = Number.MAX_SAFE_INTEGER;
@@ -97,10 +96,14 @@ function criarANO(){
             .on("mouseover", function(){
                 d3.select(this)
                 .style("fill", "red");
+                d3.select("#labelano"+i)
+                .style("visibility", "visible")
             })
             .on("mouseout", function(){
                 d3.select(this)
                 .style("fill", "blue");
+                d3.select("#labelano"+i)
+                .style("visibility", "hidden")
             })
         canvas.append("text")
                 .attr("width", 30)
@@ -109,17 +112,30 @@ function criarANO(){
                 .attr("y", 165)
                 .attr("fill", "black")
                 .text( porAno[i].year )
+        
+        canvas.append("text")
+                .attr("id", "labelano" + i)
+                .attr("width", 30)
+                .attr("height", 10)
+                .attr("x", i*35)
+                .attr("y", 150-aux*100-2)
+                .attr("fill", "black")
+                .text(  Math.floor(porAno[i].number/1000) )
+                .style("visibility", "hidden")
     }
 }
 
 function criarEstado(){
 
+    d3.select("body").append("h2").text("Queimadas por estado (em milhares)")
+                .attr("x", porEstado.length*30/2)
+                .style("color", "black")
+                .style("text-align","center");
+
     var canvas = d3.select("body").append("svg")
                 .attr("id", "grafico2")
-                .attr("width", porEstado.length*30)
-                .attr("height", 300)
-                .attr("fill", "steelblue")
-        
+                .attr("width", porEstado.length*35)
+                .attr("height", 200)
 
     var maior = 0;
     var menor = Number.MAX_SAFE_INTEGER;
@@ -138,19 +154,40 @@ function criarEstado(){
     for(let i = 0; i < porEstado.length; i++){
         var aux = (porEstado[i].number-menor)/(maior-menor);
         canvas.append("rect")
-            .attr("width", 25)
+            .attr("width", 30)
             .attr("height", aux*100)
             .attr("fill", "blue")
-            .attr("x", i*30)
-            .attr("y", 100 - aux*100)
+            .attr("x", i*35)
+            .attr("y", 150 - aux*100)
             .on("mouseover", function(){
                 d3.select(this)
                 .style("fill", "red");
+                d3.select("#labelestado"+i)
+                .style("visibility", "visible")
             })
             .on("mouseout", function(){
                 d3.select(this)
                 .style("fill", "blue");
+                d3.select("#labelestado"+i)
+                .style("visibility", "hidden")
             })
+        canvas.append("text")
+                .attr("width", 30)
+                .attr("height", 10)
+                .attr("x", i*35)
+                .attr("y", 165)
+                .attr("fill", "black")
+                .text( porEstado[i].state )
+        
+        canvas.append("text")
+                .attr("id", "labelestado" + i)
+                .attr("width", 30)
+                .attr("height", 10)
+                .attr("x", i*35)
+                .attr("y", 150-aux*100-2)
+                .attr("fill", "black")
+                .text(  Math.floor(porEstado[i].number/1000) )
+                .style("visibility", "hidden")
     }
 }
 
