@@ -2,7 +2,11 @@ let porMesEstado = []
 let porAnoEstado = []
 let porEstado = []
 let porAno = []
-let flag = false;
+const agregacao = document.querySelector("#agregacao");
+const estado = document.querySelector('#estado');
+const ano = document.querySelector('#ano');
+
+
 const csv = d3.csv("amazon.csv", function (data){
     porMesEstado.push({
         year: data.year,
@@ -220,11 +224,42 @@ function criarEstado(){
     }
 }
 
-function preencherDropDown(){
-    const agregacao = document.querySelector("#agregacao");
-    const estado = document.querySelector('#estado');
-    const ano = document.querySelector('#ano');
+function adicionaDropDownListener(){
+    const opcoes = {
+        "Por Ano" : () => {
+            estado.disabled = true;
+            ano.disabled = true;
+            criarANO();
+        },
 
+        "Por Estado": () => {
+            estado.disabled = true;
+            ano.disabled = true;
+            criarEstado();
+        },
+
+        "Por Estado e por Ano": () => {
+            estado.disabled = false;
+            ano.disabled = true;
+        },
+
+        "Por Estado e por mes": () => {
+            estado.disabled = false;
+            ano.disabled = false;
+        }
+    }
+    estado.disabled = true;
+    ano.disabled = true;
+   
+    agregacao.addEventListener('change', () => {
+        removerTodosCanvas();
+        if(opcoes[agregacao.value]){
+            opcoes[agregacao.value]();
+        }
+    })
+}
+
+function preencherDropDown(){
     const anos = porAno.map(element => element.year);
     const estados = porEstado.map(element => element.state);
 
@@ -240,31 +275,8 @@ function preencherDropDown(){
         estado.appendChild(option);
     });
 
-    estado.disabled = true;
-    ano.disabled = true;
-   
-    agregacao.addEventListener('change', () => {
-        removerTodosCanvas()
-        if(agregacao.value == "Por Ano" || agregacao.value == "Por Estado"){
-            estado.disabled = true;
-            ano.disabled = true;
-            if(agregacao.value == "Por Ano")
-                criarANO();
-            else
-                criarEstado();
-        } 
-        else if(agregacao.value == "Por Estado e por Ano"){
-            estado.disabled = false;
-            ano.disabled = true;
-        }
-        else {
-            estado.disabled = false;
-            ano.disabled = false;
-        }
-    })
+    adicionaDropDownListener();
 }
-
-
 
 csv.then(function(){
     preencherDropDown();
