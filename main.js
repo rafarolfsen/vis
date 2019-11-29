@@ -64,23 +64,29 @@ let larguraBarra = 30;
 let alturaBarra = 150;
 let espacoBarra = 35;
 
-function criarANO(){
-
+function criarGraficoCanvas(title, id, array){
     // Adiciona o título da tabela
-    d3.select("body").append("h2").text("Queimadas por ano (em milhares)")
-                .style("color", "black")                    
-                .style("text-align","center");
+    d3.select("body")
+        .append("div")
+        .attr("class", "canvas")
+        .append("h2").text(title)
+        .style("color", "black")                    
+        .style("text-align","center");
 
     // Cria espaço onde será gerado o gráfico
-    var canvas = d3.select("body").append("svg")
-                .attr("id", "grafico1")
-                .attr("width", porAno.length * espacoBarra)
+    var canvas = d3.select(".canvas").append("svg")
+                .attr("id", id)
+                .attr("width", array.length * espacoBarra)
                 .attr("height", alturaBarra+50)
 
+    return canvas;
+}
+
+function minMax(array) {
     // Pega maior e menor valor do vetor
     var maior = 0;
     var menor = Number.MAX_SAFE_INTEGER;
-    porAno.forEach((element) =>  {
+    array.forEach((element) =>  {
         if(element.number > maior){
             maior = element.number;
         }
@@ -93,6 +99,26 @@ function criarANO(){
     if(menor != 0){  
         menor = menor - maior/10;
     }
+
+    return {
+        maior,
+        menor
+    };
+}
+
+function removerTodosCanvas(){
+    document.querySelectorAll(".canvas").forEach((element) => {
+        element.parentElement.removeChild(element);
+    })
+}
+
+function criarANO(){ 
+    var canvas = criarGraficoCanvas("Queimadas por ano (em milhares)", "grafico1", porAno);
+
+    // Pega maior e menor valor do vetor
+    const valores = minMax(porAno);
+    var maior = valores.maior;
+    var menor = valores.menor;
 
     // Gera barras para cada elemento por aglomerado por ano
     for(let i = 0; i < porAno.length; i++){
@@ -141,34 +167,12 @@ function criarANO(){
 }
 
 function criarEstado(){
-
-    // Adiciona o título da tabela
-    d3.select("body").append("h2").text("Queimadas por estado (em milhares)")
-                .style("color", "black")                    
-                .style("text-align","center");
-
-    // Cria espaço onde será gerado o gráfico
-    var canvas = d3.select("body").append("svg")
-                .attr("id", "grafico2")
-                .attr("width", porEstado.length * espacoBarra)
-                .attr("height", alturaBarra+50)
+    var canvas = criarGraficoCanvas("Queimadas por estado (em milhares)", "grafico2", porEstado);
 
     // Pega maior e menor valor do vetor
-    var maior = 0;
-    var menor = Number.MAX_SAFE_INTEGER;
-    porEstado.forEach((element) =>  {
-        if(element.number > maior){
-            maior = element.number;
-        }
-        if(element.number < menor){
-            menor = element.number;
-        }
-    });
-
-    // aumenta o valor das barras de forma igualitaria para que a menor não fique com tamanho 0.
-    if(menor != 0){  
-        menor = menor - maior/10;
-    }
+    const valores = minMax(porEstado);
+    var maior = valores.maior;
+    var menor = valores.menor;
 
     // Gera barras para cada elemento por aglomerado por estado
     for(let i = 0; i < porEstado.length; i++){
@@ -216,13 +220,53 @@ function criarEstado(){
     }
 }
 
+function preencherDropDown(){
+    const agregacao = document.querySelector("#agregacao");
+    const estado = document.querySelector('#estado');
+    const ano = document.querySelector('#ano');
+
+    const anos = porAno.map(element => element.year);
+    const estados = porEstado.map(element => element.state);
+
+    anos.forEach((element) => {
+        const option = document.createElement('option');
+        option.textContent = element;
+        ano.appendChild(option)
+    });
+
+    estados.forEach((element) => {
+        const option = document.createElement('option');
+        option.textContent = element;
+        estado.appendChild(option);
+    });
+
+    estado.disabled = true;
+    ano.disabled = true;
+   
+    agregacao.addEventListener('change', () => {
+        removerTodosCanvas()
+        if(agregacao.value == "Por Ano" || agregacao.value == "Por Estado"){
+            estado.disabled = true;
+            ano.disabled = true;
+            if(agregacao.value == "Por Ano")
+                criarANO();
+            else
+                criarEstado();
+        } 
+        else if(agregacao.value == "Por Estado e por Ano"){
+            estado.disabled = false;
+            ano.disabled = true;
+        }
+        else {
+            estado.disabled = false;
+            ano.disabled = false;
+        }
+    })
+}
+
+
+
 csv.then(function(){
-
-    // função para gerar gráfico por ano
+    preencherDropDown();
     criarANO();
-
-    // função para criar grafico por estado
-    criarEstado();
-    
-
 })
