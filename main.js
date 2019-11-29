@@ -116,73 +116,17 @@ function removerTodosCanvas(){
     })
 }
 
-function criarANO(){ 
-    var canvas = criarGraficoCanvas("Queimadas por ano (em milhares)", "grafico1", porAno);
-
+function criarGrafico(canvas, array, labelCallback, valueCallback){
     // Pega maior e menor valor do vetor
-    const valores = minMax(porAno);
-    var maior = valores.maior;
-    var menor = valores.menor;
-
-    // Gera barras para cada elemento por aglomerado por ano
-    for(let i = 0; i < porAno.length; i++){
-
-        // normaliza os valores
-        var aux = (porAno[i].number-menor)/(maior-menor); // normaliza os valores
-
-        // adiciona novo container para cada barra e preenche os dados de cada uma
-        canvas.append("rect")               
-            .attr("width", larguraBarra)    
-            .attr("height", aux*100)  
-            .attr("fill", "blue")     
-            .attr("x", i * espacoBarra)
-            .attr("y", alturaBarra - aux*100)
-            .on("mouseover", function(){
-                d3.select(this)
-                .style("fill", "red");
-                d3.select("#labelano"+i)
-                .style("visibility", "visible")
-            })                          
-            .on("mouseout", function(){
-                d3.select(this)
-                .style("fill", "blue");
-                d3.select("#labelano"+i)
-                .style("visibility", "hidden")
-            })
-
-        // Adiciona o label inferior de cada barra
-        canvas.append("text")
-                .attr("width", larguraBarra)
-                .attr("height", 10)
-                .attr("x", i * espacoBarra)
-                .attr("y", alturaBarra + 15)
-                .attr("fill", "black")
-                .text( porAno[i].year )
-        
-        // Adiciona o valor numerico de cada barra
-        canvas.append("text")
-                .attr("id", "labelano" + i)
-                .attr("x", i * espacoBarra)
-                .attr("y", alturaBarra - aux * 100 - 2)
-                .attr("fill", "black")
-                .text(  Math.floor(porAno[i].number/1000) )
-                .style("visibility", "hidden")
-    }
-}
-
-function criarEstado(){
-    var canvas = criarGraficoCanvas("Queimadas por estado (em milhares)", "grafico2", porEstado);
-
-    // Pega maior e menor valor do vetor
-    const valores = minMax(porEstado);
+    const valores = minMax(array);
     var maior = valores.maior;
     var menor = valores.menor;
 
     // Gera barras para cada elemento por aglomerado por estado
-    for(let i = 0; i < porEstado.length; i++){
+    for(let i = 0; i < array.length; i++){
 
         // normaliza os valores
-        var aux = (porEstado[i].number-menor)/(maior-menor); // normaliza os valores
+        var aux = (array[i].number-menor)/(maior-menor); // normaliza os valores
 
         // adiciona novo container para cada barra e preenche os dados de cada uma
         canvas.append("rect")               
@@ -211,7 +155,7 @@ function criarEstado(){
                 .attr("x", i * espacoBarra)
                 .attr("y", alturaBarra + 15)
                 .attr("fill", "black")
-                .text( porEstado[i].state )
+                .text( labelCallback(array[i]))
         
         // Adiciona o valor numerico de cada barra
         canvas.append("text")
@@ -219,9 +163,19 @@ function criarEstado(){
                 .attr("x", i * espacoBarra)
                 .attr("y", alturaBarra - aux * 100 - 2)
                 .attr("fill", "black")
-                .text(  Math.floor(porEstado[i].number/1000) )
+                .text(valueCallback(array[i]))
                 .style("visibility", "hidden")
-    }
+    }    
+}
+
+function criarANO(){ 
+    var canvas = criarGraficoCanvas("Queimadas por ano (em milhares)", "grafico1", porAno);
+    criarGrafico(canvas, porAno, (element) => (element.year), (element) => (Math.floor(element.number/1000)));
+}
+
+function criarEstado(){
+    var canvas = criarGraficoCanvas("Queimadas por estado (em milhares)", "grafico2", porEstado);
+    criarGrafico(canvas, porEstado, (element) => (element.state), (element) => (Math.floor(element.number/1000)));
 }
 
 function adicionaDropDownListener(){
