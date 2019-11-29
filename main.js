@@ -5,6 +5,7 @@ let porAno = []
 const agregacao = document.querySelector("#agregacao");
 const estado = document.querySelector('#estado');
 const ano = document.querySelector('#ano');
+const mes = document.querySelector('#mes');
 
 
 const csv = d3.csv("amazon.csv", function (data){
@@ -197,29 +198,37 @@ function adicionaDropDownListener(){
         "Por Ano" : () => {
             estado.disabled = true;
             ano.disabled = true;
+            mes.disabled = true;
             criarANO();
         },
 
         "Por Estado": () => {
             estado.disabled = true;
             ano.disabled = true;
+            mes.disabled = true;
             criarEstado();
+            criarMapa(porEstado)
         },
 
         "Por Estado e por Ano": () => {
             estado.disabled = false;
-            ano.disabled = true;
+            ano.disabled = false;
+            mes.disabled = true;
             criarEstadoAno(estado.value);
+            criarMapa(porAnoEstado.filter((element) => (element.year == ano.value)))
         },
 
         "Por Estado e por mes": () => {
             estado.disabled = false;
             ano.disabled = false;
+            mes.disabled = false;
             criarEstadoMes(estado.value, ano.value);
+            criarMapa(porMesEstado.filter((element) => (element.year == ano.value && element.month == mes.value)))
         }
     }
     estado.disabled = true;
     ano.disabled = true;
+    mes.disabled = true;
 
     const listener = () => {
         removerTodosCanvas();
@@ -231,27 +240,86 @@ function adicionaDropDownListener(){
     agregacao.addEventListener('change', listener);
     ano.addEventListener('change', listener);
     estado.addEventListener('change', listener);
+    mes.addEventListener('change', listener);
 
 }
 
 function preencherDropDown(){
     const anos = porAno.map(element => element.year);
     const estados = porEstado.map(element => element.state);
+    const meses = porMesEstado.map(element => element.month)
+                .filter((element, pos, self) => (self.indexOf(element) == pos));
 
-    anos.forEach((element) => {
-        const option = document.createElement('option');
-        option.textContent = element;
-        ano.appendChild(option)
-    });
+    function cirarOptions(select, array){
+        array.forEach((element) => {
+            const option = document.createElement('option');
+            option.textContent = element;
+            select.appendChild(option)
+        });
+    }
 
-    estados.forEach((element) => {
-        const option = document.createElement('option');
-        option.textContent = element;
-        estado.appendChild(option);
-    });
+    cirarOptions(ano, anos);
+    cirarOptions(estado, estados);
+    cirarOptions(mes, meses);
 
     adicionaDropDownListener();
 }
+
+function criarMapa(array){
+    console.log(array)
+
+    const valores = minMax(array);
+    var maior = valores.maior;
+    var menor = valores.menor;
+    
+    //<svg width="1050" height="990"></svg>
+    var div = d3.select("body").append("div").attr("class", "canvas");
+    var svg = div.append("svg"),
+        width = +svg.attr("width", 1050),
+        height = +svg.attr("height", 990);
+    var promises = [
+        d3.json("brm.json")
+    ]
+    var path = d3.geoPath();
+    var color = d3.scaleThreshold()
+        .domain(d3.range(2, 18))
+        .range(d3.schemeBlues[9]);
+    Promise.all(promises).then(ready) 
+
+    var tip = d3.tip()
+    .attr('class', 'd3-tip')
+    .offset([140, 140])
+    .html(function(d) {
+        return "<div style='opacity:0.8;background-color:#329c68;font-family:sans-serif;padding:8px;;color:white'>"+
+                "Estado: " + d.properties.NOME_UF + "<br/>"+
+                "UF:" + d.properties.UF +"<br/>"+
+                "Numero de Queimadas: " + d.Queimadas + 
+                "</div>";
+        })
+
+    function ready([brm]) {
+       var g = svg.append("g")
+            .attr("class", "counties")
+            .selectAll("path")
+            .data(brm.features)
+            .enter().append("path")
+            .attr("fill", function(d) { 
+                array.forEach(element => {
+                    if(element.state == d.properties.UF){
+                        d.Queimadas = element.number;
+                    }
+                });
+                const normalizado = (d.Queimadas - menor) / (maior - menor);
+                return color(normalizado * 16 + 2); 
+            })
+            .attr("d", path)  
+            .on("mouseover", tip.show)
+            .on("mouseout", tip.hide)
+    
+        g.call(tip)
+    }
+
+  }
 
 csv.then(function(){
     preencherDropDown();
