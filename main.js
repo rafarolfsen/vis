@@ -178,6 +178,21 @@ function criarEstado(){
     criarGrafico(canvas, porEstado, (element) => (element.state), (element) => (Math.floor(element.number/1000)));
 }
 
+function criarEstadoAno(estado){
+    const data = porAnoEstado.filter((element) => (element.state == estado));
+    var canvas = criarGraficoCanvas("Queimads pelo estado " + estado + " por ano (em milhares)", "grafico3", data);
+    criarGrafico(canvas, data, (element) => (element.year), (element) => (Math.floor(element.number/1000)));
+}
+
+function criarEstadoMes(estado, ano){
+    const data = porMesEstado.filter((element) => (element.state == estado && element.year == ano));
+    console.log(data.length)
+    var canvas = criarGraficoCanvas("Queimads pelo estado " + estado + " pelo ano de "+ ano, "grafico4", data);
+    criarGrafico(canvas, data, (element) => (element.month.substring(0, 3)), (element) => (Math.floor(element.number)));
+}
+
+
+
 function adicionaDropDownListener(){
     const opcoes = {
         "Por Ano" : () => {
@@ -195,22 +210,29 @@ function adicionaDropDownListener(){
         "Por Estado e por Ano": () => {
             estado.disabled = false;
             ano.disabled = true;
+            criarEstadoAno(estado.value);
         },
 
         "Por Estado e por mes": () => {
             estado.disabled = false;
             ano.disabled = false;
+            criarEstadoMes(estado.value, ano.value);
         }
     }
     estado.disabled = true;
     ano.disabled = true;
-   
-    agregacao.addEventListener('change', () => {
+
+    const listener = () => {
         removerTodosCanvas();
         if(opcoes[agregacao.value]){
             opcoes[agregacao.value]();
         }
-    })
+    }
+   
+    agregacao.addEventListener('change', listener);
+    ano.addEventListener('change', listener);
+    estado.addEventListener('change', listener);
+
 }
 
 function preencherDropDown(){
