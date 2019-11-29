@@ -180,14 +180,13 @@ function criarEstado(){
 
 function criarEstadoAno(estado){
     const data = porAnoEstado.filter((element) => (element.state == estado));
-    var canvas = criarGraficoCanvas("Queimads pelo estado " + estado + " por ano (em milhares)", "grafico3", data);
-    criarGrafico(canvas, data, (element) => (element.year), (element) => (Math.floor(element.number/1000)));
+    var canvas = criarGraficoCanvas("Queimadas pelo estado " + estado + " por ano (em centenas)", "grafico3", data);
+    criarGrafico(canvas, data, (element) => (element.year), (element) => (Math.floor(element.number/100)));
 }
 
 function criarEstadoMes(estado, ano){
     const data = porMesEstado.filter((element) => (element.state == estado && element.year == ano));
-    console.log(data.length)
-    var canvas = criarGraficoCanvas("Queimads pelo estado " + estado + " pelo ano de "+ ano, "grafico4", data);
+    var canvas = criarGraficoCanvas("Queimadas pelo estado " + estado + " pelo ano de "+ ano, "grafico4", data);
     criarGrafico(canvas, data, (element) => (element.month.substring(0, 3)), (element) => (Math.floor(element.number)));
 }
 
