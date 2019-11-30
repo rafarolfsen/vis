@@ -140,7 +140,7 @@ function criarGrafico(canvas, array, labelCallback, valueCallback){
             .attr("y", alturaBarra - aux*100)
             .on("mouseover", function(){
                 d3.select(this)
-                .style("fill", "#b30000");
+                .style("fill", "#990000");
                 d3.select("#labelestado"+i)
                 .style("visibility", "visible")
             })                          
