@@ -74,6 +74,7 @@ function criarGraficoCanvas(title, id, array){
     d3.select("body")
         .append("div")
         .attr("class", "canvas")
+        .attr("x",  array.length * espacoBarra / 2)
         .append("h2").text(title)
         .style("color", "black")                    
         .style("text-align","center");
@@ -81,8 +82,9 @@ function criarGraficoCanvas(title, id, array){
     // Cria espaço onde será gerado o gráfico
     var canvas = d3.select(".canvas").append("svg")
                 .attr("id", id)
-                .attr("width", array.length * espacoBarra)
+                .attr("width", screen.width)
                 .attr("height", alturaBarra+50)
+
 
     return canvas;
 }
@@ -104,7 +106,7 @@ function minMax(array) {
     if(menor != 0){  
         menor = menor - maior/10;
     }
-
+    // retorna os valores no formato de vetor
     return {
         maior,
         menor
@@ -133,18 +135,18 @@ function criarGrafico(canvas, array, labelCallback, valueCallback){
         canvas.append("rect")               
             .attr("width", larguraBarra)    
             .attr("height", aux*100)  
-            .attr("fill", "blue")     
-            .attr("x", i * espacoBarra)
+            .attr("fill", "#e60000")     
+            .attr("x", i * espacoBarra + (screen.width/2 - array.length*espacoBarra/2) )
             .attr("y", alturaBarra - aux*100)
             .on("mouseover", function(){
                 d3.select(this)
-                .style("fill", "red");
+                .style("fill", "#b30000");
                 d3.select("#labelestado"+i)
                 .style("visibility", "visible")
             })                          
             .on("mouseout", function(){
                 d3.select(this)
-                .style("fill", "blue");
+                .style("fill", "#e60000");
                 d3.select("#labelestado"+i)
                 .style("visibility", "hidden")
             })
@@ -153,7 +155,7 @@ function criarGrafico(canvas, array, labelCallback, valueCallback){
         canvas.append("text")
                 .attr("width", larguraBarra)
                 .attr("height", 10)
-                .attr("x", i * espacoBarra)
+                .attr("x", i * espacoBarra + (screen.width/2 - array.length*espacoBarra/2) )
                 .attr("y", alturaBarra + 15)
                 .attr("fill", "black")
                 .text( labelCallback(array[i]))
@@ -161,7 +163,7 @@ function criarGrafico(canvas, array, labelCallback, valueCallback){
         // Adiciona o valor numerico de cada barra
         canvas.append("text")
                 .attr("id", "labelestado" + i)
-                .attr("x", i * espacoBarra)
+                .attr("x",  i * espacoBarra + (screen.width/2 - array.length*espacoBarra/2) )
                 .attr("y", alturaBarra - aux * 100 - 2)
                 .attr("fill", "black")
                 .text(valueCallback(array[i]))
@@ -273,17 +275,23 @@ function criarMapa(array){
     var menor = valores.menor;
     
     //<svg width="1050" height="990"></svg>
-    var div = d3.select("body").append("div").attr("class", "canvas");
-    var svg = div.append("svg"),
-        width = +svg.attr("width", 1050),
-        height = +svg.attr("height", 990);
+    var div = d3.select("body")
+            .append("div")
+            .attr("class", "canvas")
+            .attr("align", "center")
+
+    var svg = div.append("svg")
+
+    width = +svg.attr("width", 1050);
+    height = +svg.attr("height", 990);
+        
     var promises = [
         d3.json("brm.json")
     ]
     var path = d3.geoPath();
     var color = d3.scaleThreshold()
-        .domain(d3.range(2, 18))
-        .range(d3.schemeBlues[9]);
+        .domain(d3.range(1, 27))
+        .range(d3.schemeReds[9]);
     Promise.all(promises).then(ready) 
 
     var tip = d3.tip()
@@ -310,7 +318,7 @@ function criarMapa(array){
                     }
                 });
                 const normalizado = (d.Queimadas - menor) / (maior - menor);
-                return color(normalizado * 16 + 2); 
+                return color(normalizado * 27 + 1); 
             })
             .attr("d", path)  
             .on("mouseover", tip.show)
