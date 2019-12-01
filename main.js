@@ -212,53 +212,56 @@ function criarEstadoMes(estado, ano){
 
 //Adiciona os listener dos seletores
 function adicionaDropDownListener(){
+    //Event listener dos seletores, A função é chamada quando a opção com aquele nome é selecionada
     const opcoes = {
-        "Por Ano" : () => {
-            estado.disabled = true;
-            ano.disabled = true;
-            mes.disabled = true;
-            criarANO();
+        "Por Ano" : () => { 
+            estado.disabled = true; //Desativa o seletor de estado
+            ano.disabled = true; //Desativa o seletor de ano
+            mes.disabled = true; //Desativa o seletor de mes
+            criarANO(); //Cria o gŕafico de barras com ano como agregação
         },
 
         "Por Estado": () => {
-            estado.disabled = true;
-            ano.disabled = true;
-            mes.disabled = true;
-            criarEstado();
-            criarMapa(porEstado)
+            estado.disabled = true; //Desativa o seletor de estado
+            ano.disabled = true; //Desativa o seletor de ano
+            mes.disabled = true; //Desativa o seletor de mes
+            criarEstado(); //Cria o gráfico de barras com estado como agregação
+            criarMapa(porEstado) //Cria o choropleth 
         },
 
         "Por Estado e por Ano": () => {
-            estado.disabled = false;
-            ano.disabled = false;
-            mes.disabled = true;
-            criarEstadoAno(estado.value);
+            estado.disabled = false; //Ativa o seletor de estado (para o grafico de barras)
+            ano.disabled = false; //Ativa o seletor de ano (para o choropleth)
+            mes.disabled = true; //Desativa o seletor de mes
+            criarEstadoAno(estado.value); //Cria o gráfico de barras para o estado selecionado
             
-            const array = porAnoEstado.filter((element) => (element.year == ano.value)); 
-            criarMapa(array, "Queimadas pelo ano de " + ano.value);
+            const array = porAnoEstado.filter((element) => (element.year == ano.value)); //Filtra o vetor mantendo apenas os dados do ano selecionado
+            criarMapa(array, "Queimadas pelo ano de " + ano.value); //Cria o choropleth para o ano selecionado
         },
 
         "Por Estado e por mes": () => {
-            estado.disabled = false;
-            ano.disabled = false;
-            mes.disabled = false;
-            criarEstadoMes(estado.value, ano.value);
+            estado.disabled = false; //Ativa o seletor de estado (para o grafico de barras)
+            ano.disabled = false; //Ativa o seletor de ano (para o grafico de barras e choropleth)
+            mes.disabled = false; //Ativa o seletor de mes (para o choropleth)
+            criarEstadoMes(estado.value, ano.value); //Cria o gráfico de barras para o estado e ano selecionado
 
-            const array = porMesEstado.filter((element) => (element.year == ano.value && element.month == mes.value)) ;
-            criarMapa(array, "Queimadas pelo ano de " + ano.value + " no mês " + mes.value);
+            const array = porMesEstado.filter((element) => (element.year == ano.value && element.month == mes.value)); //Filtra o vetor mantendo apenas os dados do ano e mes selecionados
+            criarMapa(array, "Queimadas pelo ano de " + ano.value + " no mês " + mes.value); //Cria o choropleth para o ano e mes selecionados
         }
     }
     estado.disabled = true;
     ano.disabled = true;
     mes.disabled = true;
 
+    //Listener que será usado em todos os seletores
     const listener = () => {
-        removerTodosCanvas();
-        if(opcoes[agregacao.value]){
-            opcoes[agregacao.value]();
+        removerTodosCanvas(); //Apaga todos os gráficos
+        if(opcoes[agregacao.value]){ 
+            opcoes[agregacao.value](); //Chama a função especifica da opção selecionada
         }
     }
    
+    //Adiciona o listener nos seletores
     agregacao.addEventListener('change', listener);
     ano.addEventListener('change', listener);
     estado.addEventListener('change', listener);
@@ -266,12 +269,14 @@ function adicionaDropDownListener(){
 
 }
 
+//Função que adiciona as opções nos seletores
 function preencherDropDown(){
-    const anos = porAno.map(element => element.year);
-    const estados = porEstado.map(element => element.state);
-    const meses = porMesEstado.map(element => element.month)
+    const anos = porAno.map(element => element.year); //Recupera todos os anos presentes no dataset
+    const estados = porEstado.map(element => element.state); //Recupera os estados presentes no dataset
+    const meses = porMesEstado.map(element => element.month) //Recupera os meses presentes no dataset
                 .filter((element, pos, self) => (self.indexOf(element) == pos));
 
+    //Função que dado um array e um seletor, cria as opções com os dados do array
     function cirarOptions(select, array){
         array.forEach((element) => {
             const option = document.createElement('option');
@@ -279,40 +284,41 @@ function preencherDropDown(){
             select.appendChild(option)
         });
     }
-
-    cirarOptions(ano, anos);
+    cirarOptions(ano, anos); 
     cirarOptions(estado, estados);
     cirarOptions(mes, meses);
 
-    adicionaDropDownListener();
+    adicionaDropDownListener(); //Adiciona os listeners nos seletores
 }
 
+//Função que cria o choropleth
 function criarMapa(array, title){
-    const valores = minMax(array);
+    const valores = minMax(array); //Recupera o min e max do vetor
     var maior = valores.maior;
     var menor = valores.menor;
     
+    //Adiciona a div que irá conter o choropleth
     var div = d3.select("body")
             .append("div")
             .attr("class", "canvas")
             .attr("align", "center")
-    div.append("h2").text(title);
+    div.append("h2").text(title); //Adiciona um titulo h2 a div
     
-    var svg = div.append("svg")
+    var svg = div.append("svg") //Adiciona o svg que irá conter o choropleth
 
     width = +svg.attr("width", 1050);
     height = +svg.attr("height", 990);
         
     var promises = [
-        d3.json("https://raw.githubusercontent.com/rafarolfsen/vis/master/brm.json")
+        d3.json("https://raw.githubusercontent.com/rafarolfsen/vis/master/brm.json") //Leitura do geojson que contem o mapa do brasil
     ]
     var path = d3.geoPath();
     var color = d3.scaleThreshold()
         .domain(d3.range(1, 27))
         .range(d3.schemeReds[9]);
-    Promise.all(promises).then(ready) 
+    Promise.all(promises).then(ready) //Executa assincronamente a função de leitura do geojson
 
-    var tip = d3.tip()
+    var tip = d3.tip() //Cria o tip card que aparece ao passar o mouse sobre o mapa
     .attr('class', 'd3-tip')
     .offset([140, 140])
     .html(function(d) {
@@ -332,11 +338,11 @@ function criarMapa(array, title){
             .attr("fill", function(d) { 
                 array.forEach(element => {
                     if(element.state == d.properties.UF){
-                        d.Queimadas = element.number;
+                        d.Queimadas = element.number; //Adiciona no mapa o numero de queimadas de cada estado
                     }
                 });
-                const normalizado = (d.Queimadas - menor) / (maior - menor);
-                return color(normalizado * 27 + 1); 
+                const normalizado = (d.Queimadas - menor) / (maior - menor); //Normaliza o valor das queimadas entre 0 e 1
+                return color(normalizado * 27 + 1);  //Colore o mapa baseado no numero de queimadas
             })
             .attr("d", path)  
             .on("mouseover", tip.show)
@@ -347,7 +353,10 @@ function criarMapa(array, title){
 
   }
 
+//MAIN
+
+//Executa assincronamente a leitura do dataset
 csv.then(function(){
-    preencherDropDown();
-    criarANO();
+    preencherDropDown(); //Após a leitura preenche os seletores
+    criarANO(); //Após a leitura cria o grafico de barras
 })
