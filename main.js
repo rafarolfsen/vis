@@ -233,7 +233,9 @@ function adicionaDropDownListener(){
             ano.disabled = false;
             mes.disabled = true;
             criarEstadoAno(estado.value);
-            criarMapa(porAnoEstado.filter((element) => (element.year == ano.value)))
+            
+            const array = porAnoEstado.filter((element) => (element.year == ano.value)); 
+            criarMapa(array, "Queimadas pelo ano de " + ano.value);
         },
 
         "Por Estado e por mes": () => {
@@ -241,7 +243,9 @@ function adicionaDropDownListener(){
             ano.disabled = false;
             mes.disabled = false;
             criarEstadoMes(estado.value, ano.value);
-            criarMapa(porMesEstado.filter((element) => (element.year == ano.value && element.month == mes.value)))
+
+            const array = porMesEstado.filter((element) => (element.year == ano.value && element.month == mes.value)) ;
+            criarMapa(array, "Queimadas pelo ano de " + ano.value + " no mês " + mes.value);
         }
     }
     estado.disabled = true;
@@ -283,7 +287,7 @@ function preencherDropDown(){
     adicionaDropDownListener();
 }
 
-function criarMapa(array){
+function criarMapa(array, title){
     const valores = minMax(array);
     var maior = valores.maior;
     var menor = valores.menor;
@@ -292,7 +296,8 @@ function criarMapa(array){
             .append("div")
             .attr("class", "canvas")
             .attr("align", "center")
-
+    div.append("h2").text(title);
+    
     var svg = div.append("svg")
 
     width = +svg.attr("width", 1050);
