@@ -7,8 +7,11 @@ const estado = document.querySelector('#estado');
 const ano = document.querySelector('#ano');
 const mes = document.querySelector('#mes');
 
+//Leitura dos dados
+const csv = d3.csv("https://raw.githubusercontent.com/rafarolfsen/vis/master/amazon.csv", function (data){
+    //Essa função é executada a cada linha lida
 
-const csv = d3.csv("amazon.csv", function (data){
+    //Adiciona a linha no vetor porMesEstado que tem os dados no menor nivel de granularidade
     porMesEstado.push({
         year: data.year,
         state: data.state,
@@ -16,30 +19,37 @@ const csv = d3.csv("amazon.csv", function (data){
         number: parseInt(data.number)
     })
 
+    //porAnoEstado agrega os dados por ano e estado, somando todas as entradas de mesmo ano e estado
+    //Verifica se ja existe uma entrada desse ano e desse estado no vetor porAnoEstado para realizar a agregação
     var inserirAnoEstado = true;
     porAnoEstado.forEach((element, index) => {
         if(element.state == data.state && element.year == data.year){
             inserirAnoEstado = false;
-            element.number += parseInt(data.number, 10);
+            element.number += parseInt(data.number, 10); //Agregação
         } 
     });
 
+    //porEstado agrega os dados por estado, somando todas as entradas de mesmo estado
+    //Verifica se ja existe uma entrada desse estado no vetor porEstado para realizar a agregação
     var inserirEstado = true;
     porEstado.forEach(element => {
         if(element.state == data.state) {
             inserirEstado = false;
-            element.number += parseInt(data.number);
+            element.number += parseInt(data.number); //Agregação
         }
     })
 
+    //porAno agrega os dados por ano, somando todas as entradas de mesmo ano
+    //Verifica se ja existe uma entrada desse ano no vetor porAno para realizar a agregação
     var inserirAno = true;
     porAno.forEach(element => {
         if(element.year == data.year){
             inserirAno = false;
-            element.number += parseInt(data.number, 10);
+            element.number += parseInt(data.number, 10); //Agregação
         }
     })
 
+    //Se não realizou agregação, deve-se inserir essa linha
     if(inserirAnoEstado){
         porAnoEstado.push({
             year: data.year,
@@ -48,6 +58,7 @@ const csv = d3.csv("amazon.csv", function (data){
         })
     }
 
+    //Se não realizou agregação, deve-se inserir essa linha
     if(inserirEstado){
         porEstado.push({
             state: data.state,
@@ -55,6 +66,7 @@ const csv = d3.csv("amazon.csv", function (data){
         })
     }
 
+    //Se não realizou agregação, deve-se inserir essa linha
     if(inserirAno) {
         porAno.push({
             year: data.year,
@@ -111,6 +123,7 @@ function minMax(array) {
     };
 }
 
+//Remove todas as divs com a classe canvas
 function removerTodosCanvas(){
     document.querySelectorAll(".canvas").forEach((element) => {
         element.parentElement.removeChild(element);
@@ -169,30 +182,33 @@ function criarGrafico(canvas, array, labelCallback, valueCallback){
     }    
 }
 
+//Cria um grafico de barras por ano
 function criarANO(){ 
     var canvas = criarGraficoCanvas("Queimadas por ano (em milhares)", "grafico1", porAno);
     criarGrafico(canvas, porAno, (element) => (element.year), (element) => (Math.floor(element.number/1000)));
 }
 
+//Cria um grafico de barras por estado
 function criarEstado(){
     var canvas = criarGraficoCanvas("Queimadas por estado (em milhares)", "grafico2", porEstado);
     criarGrafico(canvas, porEstado, (element) => (element.state), (element) => (Math.floor(element.number/1000)));
 }
 
+//Cria um grafico de barras pelo estado selecionado e por ano
 function criarEstadoAno(estado){
     const data = porAnoEstado.filter((element) => (element.state == estado));
     var canvas = criarGraficoCanvas("Queimadas pelo estado " + estado + " por ano (em centenas)", "grafico3", data);
     criarGrafico(canvas, data, (element) => (element.year), (element) => (Math.floor(element.number/100)));
 }
 
+//Cria um grafico de barras pelo estado selecionado e pelo ano selecionado
 function criarEstadoMes(estado, ano){
     const data = porMesEstado.filter((element) => (element.state == estado && element.year == ano));
     var canvas = criarGraficoCanvas("Queimadas pelo estado " + estado + " pelo ano de "+ ano, "grafico4", data);
     criarGrafico(canvas, data, (element) => (element.month.substring(0, 3)), (element) => (Math.floor(element.number)));
 }
 
-
-
+//Adiciona os listener dos seletores
 function adicionaDropDownListener(){
     const opcoes = {
         "Por Ano" : () => {
@@ -266,19 +282,16 @@ function preencherDropDown(){
 }
 
 function criarMapa(array){
-    console.log(array)
-
     const valores = minMax(array);
     var maior = valores.maior;
     var menor = valores.menor;
     
-    //<svg width="1050" height="990"></svg>
     var div = d3.select("body").append("div").attr("class", "canvas");
     var svg = div.append("svg"),
         width = +svg.attr("width", 1050),
         height = +svg.attr("height", 990);
     var promises = [
-        d3.json("brm.json")
+        d3.json("https://raw.githubusercontent.com/rafarolfsen/vis/master/brm.json")
     ]
     var path = d3.geoPath();
     var color = d3.scaleThreshold()
